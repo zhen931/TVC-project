@@ -29,3 +29,19 @@ class IMU:
         
         self.initSensor()
 
+    def initSensor(self):
+        # Wake up the MPU6050 (it sleeps by default)
+        self.bus.write_byte_data(self.deviceAddress, self.PWR_MGMT_1, 0)
+        
+        # Set Sample Rate (1Khz / (7+1) = 125Hz)
+        self.bus.write_byte_data(self.deviceAddress, self.SMPLRT_DIV, 7)
+        
+        # Set Config (DLPF - Digital Low Pass Filter)
+        self.bus.write_byte_data(self.deviceAddress, self.CONFIG, 0)
+        
+        # Set Gyro Range (+/- 250 deg/s) -> Scale Factor 131.0
+        self.bus.write_byte_data(self.deviceAddress, self.GYRO_CONFIG, 0)
+        
+        # Set Accel Range (+/- 2g) -> Scale Factor 16384.0
+        # Register 0x1C (ACCEL_CONFIG) is implicitly 0 (2g) on reset
+        
