@@ -1,4 +1,4 @@
-function [state_dot] = Physics(rocket, state, control, env)
+function [state_dot] = Physics(rocket, x, control, env)
 %%%%% Physics engine that determines state derivatives
 %%% Inputs:
 %%% Rocket struct
@@ -52,17 +52,63 @@ function [state_dot] = Physics(rocket, state, control, env)
 %     'rho', 1.225, ...
 %     'wind', zeros(3,1));
 
-% Unpacking state struct
-x = [state.position,
-    state.velocity,
-    state.q,
-    state.omega,
-    state.T,
-    state.m,
-    state.cg,
-    state.cp];
+%% Preparing Data
 
-% Computing aero forces
+% Unpacking x
+r = x(1:3);
+v = x(4:6);
+q = x(7:10);
+omega = x(11:13);
+T = x(14);
+m = x(15);
+cg = x(16:18);
+cp = x(19:21);
+
+% Unpacking control struct
+g_pitch = control.gimbal_pitch;
+g_yaw = control.gimbal_yaw;
+
+
+%% Thrust
+dT = rocket.T.delay(T, rocket.T.map(control.throttle)) * rocket.T.max;
+T_b = [T,0,0] * [];
+T_w = BodytoWorld(q, T_b);
+
+
+%% Mass
+dm = rocket.mass.burn(m);
+
+
+%% Aero
+
+% Getting body velocity and dynamic pressure
+v_b = WorldtoBody(q, v - env.wind);
+V_b = sqrt(v_b(1)^2 + v_b(2)^2 + v_b(3)^2);
+v_hat = v_b / V_b;
+q_dyn = 0.5 * env.rho * V_b^2;
+
+% Sideslip (rad)
+x_b = [1;0;0];
+v_n = v_hat - dot(v_hat, x_b) * x_b; % implement manually
+V_n = sqrt(v_n(1)^2 + v_n(2)^2 + v_n(3)^2);
+cos_alpha = dot(v_hat, x_b); % ensure between [-1,1]; implement manually
+
+
+%% Total Force and Moments
+
+% Forces
+F_aero_w = BodytoWorld(q, F_aero_b);
+F_w = T_w + F_aero_w + [0; 0; m*env.g];
+
+% Moments
+
+
+
+%% State Derivative Update
+
+state_dot(1:3) = v;
+state_dot(4:6) = [];
+state_dot(14) = dT;
 
 
 end
