@@ -67,11 +67,12 @@ cp = x(19:21);
 % Unpacking control struct
 g_pitch = control.gimbal_pitch;
 g_yaw = control.gimbal_yaw;
+gimbal = [0, 0, 0; 0, 0, 0; 0, 0, 0];
 
 
 %% Thrust
 dT = rocket.T.delay(T, rocket.T.map(control.throttle)) * rocket.T.max;
-T_b = [T,0,0] * [];
+T_b = [T,0,0] * []; % write out matrix operation manually for compute
 T_w = BodytoWorld(q, T_b);
 
 
@@ -102,6 +103,28 @@ F_w = T_w + F_aero_w + [0; 0; m*env.g];
 
 % Moments
 
+
+%% Rotational Dynamics
+
+omegaI = [
+    w1*rocket.I(1,1) + w2*rocket.I(1,2) + w3*rocket.I(1,3);
+    w1*rocket.I(2,1) + w2*rocket.I(2,2) + w3*rocket.I(2,3);
+    w1*rocket.I(3,1) + w2*rocket.I(3,2) + w3*rocket.I(3,3)];
+
+omega_cross_omegaI = [
+    w2*omegaI(3) - w3*omegaI(2);
+    w3*omegaI(1) - w1*omegaI(3);
+    w1*omegaI(2) - w2*omegaI(1)];
+
+omega_dot = rocket.I \ (M_b - omega_cross_omegaI);
+
+
+% Quaternion Integration
+q_dot = 0.5 * [
+    -q(2)*w1 - q(3)*w2 - q(4)*w3;
+    q(1)*w1 + q(3)*w3 - q(4)*w2;
+    q(1)*w2 - q(2)*w3 + q(4)*w1;
+    q(1)*w3 + q(2)*w2 - q(3)*w1];
 
 
 %% State Derivative Update

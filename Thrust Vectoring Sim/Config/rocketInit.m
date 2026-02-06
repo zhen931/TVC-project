@@ -1,19 +1,30 @@
-function [rocket] = rocketInit(thrustmap, thrustdelay)
+function [rocket] = rocketInit(rocketname, massmap, inertiamap, cpmap, bodypolarmap, finpolarmap, thrustmap, thrustdelay, fuelburn)
 %%%%% Reads rocket excel sheet and outputs struct
+
+% Filename
+filename = strcat(rocketname, '.xlsx');
 
 % Geometry
 % Note that x coordinate is along the rocket from cg
-geomdat = readtable('rocketDat.xlsx', 'Sheet','geom');
+geomdat = readtable(filename, 'Sheet','geom');
 rocket.geom = table2struct(geomdat);
 
-% Aero Params (Cp locations, not polars)
-aerodat = readtable('rocketDat.xlsx', 'Sheet','aero');
-rocket.aero = table2struct(aerodat);
+% Mass
+rocket.mass = massFit(filename, massmap);
 
-% Interial
-inertiadat = readtable('rocketDat.xlsx', 'Sheet','int');
-rocket.inertia = table2struct(inertiadat);
+% Inertia
+rocket.inertia = inertiaFit(filename, inertiamap, rocket.mass.m_maxfuel);
 
-% Thrust Data
+% Cp
+rocket.aero.cpmap = cpFit(cpmap);
+
+% Polars
+rocket.aero.bodymap = polarFit(bodypolarmap);
+rocket.aero.finmap = polarFit(finpolarmap);
+
+% Thrust
 [rocket.T.map, rocket.T.delay, rocket.T.max] = thrustFit(thrustmap, thrustdelay);
+
+% Fuel burn
+rocket.mass.burn = burnFit(fuelburn, rocket.T);
 end

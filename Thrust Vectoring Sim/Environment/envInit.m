@@ -7,14 +7,13 @@ wind = [0, 0, 0];
 % Getting Map Data
 switch envmap
     case 'dummy'
-        Altitude = (0:100:45000)';
-        T = ones(size(Altitude)) * 273;
-        rho = ones(size(Altitude)) * 1.225;
-        envdat = table(Altitude,T,rho, 'VariableNames',{'Altitude','T','rho'});
-    case 'stdatm'
-        envdat = readtable('EnvironmentDat.xlsx');
+        envdat.Altitude = (0:100:45000)';
+        envdat.T = ones(size(Altitude)) * 273;
+        envdat.rho = ones(size(Altitude)) * 1.225;
+    otherwise
+        envdat = readtable(envmap + '.xlsx');
+        envdat = table2struct(envdat, "ToScalar",true);
 end
-envdat = table2struct(envdat, "ToScalar",true);
 
 % Mapping T and rho
 tmap = griddedInterpolant(envdat.Altitude, envdat.T);
