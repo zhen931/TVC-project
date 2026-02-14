@@ -1,0 +1,50 @@
+clc
+clear
+close all
+
+%%%%% Rocket Simulator
+
+%% Params
+rocketname = 'RocketDat';       % [filename]
+ctrlmode = 'dummy';             % dummy, [ctrl name]
+massmap = 'linear';             % linear, [filename]
+inertiamap = 'linear';          % linear, [filename]
+thrustmap = 'linear';           % linear, [filename]
+fuelburnmap = 'linear';         % linear, [filename]
+thrustdelay = 'ode1';           % ode1 (1st oder ODE), [function handle]
+cpmap = 'dummy';                % dummy, [filename]
+bodypolarmap = 'dummy';         % dummy, [filename], cfd
+finpolarmap = 'dummy';          % dummy, [filename], xfoil, cfd
+envmap = 'dummy';               % dummy, [filename]
+
+%% Config
+% Loading directories
+addpath(fullfile(pwd, 'Config/'), ...
+        fullfile(pwd, 'Config/cpFits'), ...
+        fullfile(pwd, 'Config/cgFits/'), ...
+        fullfile(pwd, 'Config/PolarFits/'), ...
+        fullfile(pwd, 'Config/RocketData/'), ...
+        fullfile(pwd, 'Config/ThrustFits/'), ...
+        fullfile(pwd, 'Config/ThrustFits/Delays/'), ...
+        fullfile(pwd, 'Config/ThrustFits/FuelburnMaps/'), ...
+        fullfile(pwd, 'Config/ThrustFits/ThrottleMaps/'), ...
+        fullfile(pwd, 'Controllers/'), ...
+        fullfile(pwd, 'Environment/'), ...
+        fullfile(pwd, 'Simulation/'), ...
+        fullfile(pwd, 'Simulation/Engines/'), ...
+        fullfile(pwd, 'Simulation/PathGen/'), ...
+        fullfile(pwd, 'Simulation/Solvers/'), ...
+        fullfile(pwd, 'Simulation/TestModes/'));
+
+% Loading rocket data
+rocket = rocketInit(rocketname, massmap, inertiamap, cpmap, bodypolarmap, finpolarmap, thrustmap, thrustdelay, fuelburnmap);
+
+% Loading environment model
+[env.alt.gmap, env.alt.tmap, env.alt.rhomap, env.wind] = envInit(envmap);
+
+%% Simulations
+freedat = freeSim(rocket, ctrlmode);
+MCdat = MCSim(rocket, ctrlmode);
+pathdat = pathSim(rocket, ctrlmode);
+
+%% Visualising and Analysing Data
