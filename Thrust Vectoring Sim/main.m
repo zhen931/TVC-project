@@ -33,7 +33,7 @@ opts.gimbal.delay = 'Gode1';          % ode1 (1st oder ODE), [function handle]
 
 opts.env.altmap = 'dummy';            % dummy, [filename]
 opts.env.windmap = 'const';           % const, [filename]
-opts.env.wind = [10;0;0];              % onlt for windmap = const
+opts.env.wind = [0;0;0];              % onlt for windmap = const
 opts.env.gamma = 1.4;
 opts.env.R = 287;
 
