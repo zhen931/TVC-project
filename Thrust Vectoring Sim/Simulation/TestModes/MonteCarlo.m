@@ -1,4 +1,4 @@
-function [data] = MCSim(rocket, ctrlmode)
+function [data] = MonteCarlo(rocket, ctrlmode)
 %%%%% MC flight sim
 
 

@@ -1,16 +1,26 @@
-function [outputArg1,outputArg2] = StraightPath(inputArg1,inputArg2)
-%STRAIGHTPATH Summary of this function goes here
-%   Detailed explanation goes here
-arguments (Input)
-    inputArg1
-    inputArg2
+function [path] = Straight(startpoint, endpoint, vTarget)
+%%%%% Generates a straight flightpath
+%%% Inputs:
+% Startpoint - start coordinate [x,y,z] in world FoR
+% Endpoint - end coordinate [x,y,z] in world FoR
+% vTarget - target velocity
+%%% Outputs:
+% path - object containing:
+%           - desired trajectory(t)
+%           - desired velocity(t)
+
+% Determining mode
+switch vTarget
+    case "const"
+
+    case "func"
+
+    otherwise
+        disp("Velocity pathing mode not recognised.")
 end
 
-arguments (Output)
-    outputArg1
-    outputArg2
-end
+% Creating map
+path.r = griddedInterpolant();
+path.v = griddedInterpolant();
 
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
 end
